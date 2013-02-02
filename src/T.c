@@ -96,7 +96,6 @@ static void
 set_app_preferences(VteTerminal *terminal)
 {
 	/*
-	 * WARNING:
 	 * Options set here can be configured through config.h
 	 */
 
