@@ -106,22 +106,28 @@ static void
 set_app_preferences(VteTerminal *terminal)
 {
     /*
-     * Options set here can be configured through config.h
+     * Options set here can (and should) be configured through config.h
      */
 
-    int i;
-    GdkColor palette[PALETTE_SIZE], bg_color, fg_color;
+    static gboolean colors_parsed = FALSE;
+    static GdkColor palette[PALETTE_SIZE], bg_color, fg_color;
+
+    if (!colors_parsed) {
+        int i;
+
+        gdk_color_parse(FOREGROUND_COLOR, &fg_color);
+        gdk_color_parse(BACKGROUND_COLOR, &bg_color);
+        for (i = 0; i < PALETTE_SIZE; ++i)
+            gdk_color_parse(COLOR_PALETTE[i], &palette[i]);
+
+        colors_parsed = TRUE;
+    }
 
     /* Set preferences */
     vte_terminal_set_mouse_autohide(terminal, MOUSE_AUTOHIDE);
     vte_terminal_set_visible_bell(terminal, VISIBLE_BELL);
     vte_terminal_set_audible_bell(terminal, AUDIBLE_BELL);
     vte_terminal_set_font_from_string(terminal, FONT_NAME);
-
-    gdk_color_parse(FOREGROUND_COLOR, &fg_color);
-    gdk_color_parse(BACKGROUND_COLOR, &bg_color);
-    for (i = 0; i < PALETTE_SIZE; ++i)
-        gdk_color_parse(COLOR_PALETTE[i], &palette[i]);
     vte_terminal_set_colors(terminal, &fg_color, &bg_color, palette, PALETTE_SIZE);
 }
 
