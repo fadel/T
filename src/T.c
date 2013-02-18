@@ -56,12 +56,26 @@ terminal_key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
     switch (key_event->keyval) {
     case GDK_KEY_C:
     case GDK_KEY_c:
-        vte_terminal_copy_clipboard(terminal);
-        break;
+        /*
+         * Before, this was:
+         * vte_terminal_copy_clipboard(terminal);
+         * break;
+         * But now we just turn this event into a Control+Insert and delegate it
+         */
+        key_event->keyval = GDK_KEY_Insert;
+        key_event->state &= ~GDK_SHIFT_MASK;
+        return FALSE;
     case GDK_KEY_V:
     case GDK_KEY_v:
-        vte_terminal_paste_clipboard(terminal);
-        break;
+        /*
+         * Before, this was:
+         * vte_terminal_paste_clipboard(terminal);
+         * break;
+         * But now we just turn this event into a Shift+Insert and delegate it
+         */
+        key_event->keyval = GDK_KEY_Insert;
+        key_event->state &= ~GDK_CONTROL_MASK;
+        return FALSE;
     case GDK_KEY_N:
     case GDK_KEY_n:
         spawn_window();
@@ -109,26 +123,31 @@ set_app_preferences(VteTerminal *terminal)
      * Options set here can (and should) be configured through config.h
      */
 
+    /*
+     * These are static because this function is called every time a new window
+     * is created and we don't want to parse the colors all over again
+     */
     static gboolean colors_parsed = FALSE;
-    static GdkColor palette[PALETTE_SIZE], bg_color, fg_color;
+    static GdkColor palette[CONFIG_PALETTE_SIZE], bg_color, fg_color;
 
     if (!colors_parsed) {
         int i;
 
-        gdk_color_parse(FOREGROUND_COLOR, &fg_color);
-        gdk_color_parse(BACKGROUND_COLOR, &bg_color);
-        for (i = 0; i < PALETTE_SIZE; ++i)
-            gdk_color_parse(COLOR_PALETTE[i], &palette[i]);
+        gdk_color_parse(CONFIG_FOREGROUND_COLOR, &fg_color);
+        gdk_color_parse(CONFIG_BACKGROUND_COLOR, &bg_color);
+        for (i = 0; i < CONFIG_PALETTE_SIZE; ++i)
+            gdk_color_parse(CONFIG_COLOR_PALETTE[i], &palette[i]);
 
         colors_parsed = TRUE;
     }
 
     /* Set preferences */
-    vte_terminal_set_mouse_autohide(terminal, MOUSE_AUTOHIDE);
-    vte_terminal_set_visible_bell(terminal, VISIBLE_BELL);
-    vte_terminal_set_audible_bell(terminal, AUDIBLE_BELL);
-    vte_terminal_set_font_from_string(terminal, FONT_NAME);
-    vte_terminal_set_colors(terminal, &fg_color, &bg_color, palette, PALETTE_SIZE);
+    vte_terminal_set_audible_bell(terminal, CONFIG_AUDIBLE_BELL);
+    vte_terminal_set_colors(terminal, &fg_color, &bg_color, palette, CONFIG_PALETTE_SIZE);
+    vte_terminal_set_font_from_string(terminal, CONFIG_FONT_NAME);
+    vte_terminal_set_mouse_autohide(terminal, CONFIG_MOUSE_AUTOHIDE);
+    vte_terminal_set_scrollback_lines(terminal, CONFIG_SCROLLBACK_LINES);
+    vte_terminal_set_visible_bell(terminal, CONFIG_VISIBLE_BELL);
 }
 
 static void
@@ -157,8 +176,8 @@ setup_window(GtkWindow *window)
 
     hints.base_width  = vte_terminal_get_char_width(terminal);
     hints.base_height = vte_terminal_get_char_height(terminal);
-    hints.min_width   = hints.base_width * MIN_WIDTH;
-    hints.min_height  = hints.base_height * MIN_HEIGHT;
+    hints.min_width   = hints.base_width * CONFIG_MIN_WIDTH;
+    hints.min_height  = hints.base_height * CONFIG_MIN_HEIGHT;
     hints.width_inc   = hints.base_width;
     hints.height_inc  = hints.base_height;
     gtk_window_set_geometry_hints(window, GTK_WIDGET(terminal), &hints, GDK_HINT_RESIZE_INC | GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE);
