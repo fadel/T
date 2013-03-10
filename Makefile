@@ -4,18 +4,19 @@ INCS = `pkg-config --cflags gtk+-2.0 vte`
 LIBS = `pkg-config --libs gtk+-2.0 vte`
 CFLAGS = -ansi -pedantic -Wall -O3 ${INCS}
 LDFLAGS = -s ${LIBS}
+VER = 0.7
 CC = cc
 
-SRC = T.c
+SRC = src/T.c
 OBJ = ${SRC:.c=.o}
 
 all: T
 
 .c.o:
 	@echo CC $<
-	@${CC} -c ${CFLAGS} $<
+	@${CC} -c ${CFLAGS} -o $@ $<
 
-${OBJ}: config.h
+${OBJ}: src/config.h
 
 T: ${OBJ}
 	@echo CC -o $@
@@ -23,10 +24,17 @@ T: ${OBJ}
 
 clean:
 	@echo cleaning
-	@rm -rf T ${OBJ}
+	@rm -f T ${OBJ} T-${VER}.tar.bz2
+
+dist: PKGBUILD
+	@echo creating distributable tarball
+	@mkdir T-${VER}
+	@cp -R src/ PKGBUILD T.desktop Makefile T-${VER}
+	@tar cf T-${VER}.tar.bz2 T-${VER}
+	@rm -rf T-${VER}
 
 install: all
-	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
+	@echo installing executable file in ${DESTDIR}${PREFIX}/bin
 	@install -D -m755 T ${DESTDIR}${PREFIX}/bin/T
-	@echo installing icon to ${DESTDIR}${PREFIX}/share/applications
+	@echo installing icon in ${DESTDIR}${PREFIX}/share/applications
 	@install -D -m644 T.desktop ${DESTDIR}${PREFIX}/share/applications/T.desktop

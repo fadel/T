@@ -1,7 +1,7 @@
 # Maintainer: Samuel Fadel <samuelfadel at DOMAIN> (DOMAIN is gmail dot com)
 
 pkgname=T
-pkgver=0.6
+pkgver=0.7
 pkgrel=1
 pkgdesc="Lean Terminal emulator"
 arch=('i686' 'x86_64')
