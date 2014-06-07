@@ -7,9 +7,9 @@ possible, while still being usable. Configuration is done by modifying the file
 ## Compilation ##
 To compile T, run:
 
-    $ make
+    make
 
 ## Installation ##
 To install T, run (as root):
 
-    # make install
+    make install
