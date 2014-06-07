@@ -2,6 +2,20 @@
  * T.c
  *
  * T is a lean Terminal emulator.
+ *
+ * This file is part of T.
+ *
+ * T is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * T is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * T. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <gdk/gdk.h>
@@ -57,7 +71,7 @@ terminal_key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
     case GDK_KEY_C:
     case GDK_KEY_c:
         /*
-         * Before, this was:
+         * This was:
          * vte_terminal_copy_clipboard(terminal);
          * break;
          * But now we just turn this event into a Control+Insert and delegate it
@@ -68,7 +82,7 @@ terminal_key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
     case GDK_KEY_V:
     case GDK_KEY_v:
         /*
-         * Before, this was:
+         * This was:
          * vte_terminal_paste_clipboard(terminal);
          * break;
          * But now we just turn this event into a Shift+Insert and delegate it
