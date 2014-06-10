@@ -23,34 +23,34 @@
 #define CONFIG_MIN_HEIGHT 5
 
 /* Font name */
-#define CONFIG_FONT_NAME "Terminus 9"
+#define CONFIG_FONT_NAME "Monospace 9"
 
 /* Color palette definition */
 /* PALETTE_SIZE must be 8, 16, 24 or between 25 and 255, inclusive */
 #define CONFIG_PALETTE_SIZE 16
 
 static const char *CONFIG_COLOR_PALETTE[CONFIG_PALETTE_SIZE] = {
-	"#000000", /* 0 Black */
-	"#a5372e", /* 1 Red */
-	"#4a663c", /* 2 Green */
-	"#7c5618", /* 3 Yellow */
-	"#566060", /* 4 Blue */
-	"#8e4948", /* 5 Magenta */
-	"#6d5b42", /* 6 Cyan */
-	"#8d8d8d", /* 7 White */
-	"#2b2b2b", /* 8 Black */
-	"#e06c5c", /* 9 Red */
-	"#7b996c", /* 10 Green */
-	"#b38849", /* 11 Yellow */
-	"#889393", /* 12 Blue */
-	"#c67c78", /* 13 Magenta */
-	"#a28d73", /* 14 Cyan */
-	"#c6c6c6", /* 15 White */
+	"#000000000000", /* 0 Black */
+	"#959551513a3a", /* 1 Red */
+	"#3a3a95955151", /* 2 Green */
+	"#7e7e95953a3a", /* 3 Yellow */
+	"#3d3d55558d8d", /* 4 Blue */
+	"#95953a3a7e7e", /* 5 Magenta */
+	"#3a3a7e7e9595", /* 6 Cyan */
+	"#d9d9d9d9d9d9", /* 7 White */
+	"#444444444444", /* 8 Black */
+	"#c1c178786060", /* 9 Red */
+	"#6060c1c17878", /* 10 Green */
+	"#a9a9c1c16060", /* 11 Yellow */
+	"#5f5f7a7ababa", /* 12 Blue */
+	"#c1c16060a9a9", /* 13 Magenta */
+	"#6060a9a9c1c1", /* 14 Cyan */
+	"#ffffffffffff", /* 15 White */
 };
 
 /* Foreground and background. */
-#define CONFIG_FOREGROUND_COLOR "#757575" /* COLOR_PALETTE[7] */
-#define CONFIG_BACKGROUND_COLOR "#151515" /* COLOR_PALETTE[0] */
+#define CONFIG_FOREGROUND_COLOR "#d9d9e6e6f2f2" /* COLOR_PALETTE[7] */
+#define CONFIG_BACKGROUND_COLOR "#0d0d19192626" /* COLOR_PALETTE[0] */
 
 /* Scrollback lines (0 means disabled; negative means "infinite") */
 #define CONFIG_SCROLLBACK_LINES 2000
