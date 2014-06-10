@@ -61,7 +61,7 @@ static gboolean
 terminal_key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
     GdkEventKey *key_event = (GdkEventKey *) event;
-    VteTerminal *terminal = (VteTerminal *) widget;
+    /* VteTerminal *terminal = (VteTerminal *) widget; */
 
     if ((key_event->state & GDK_SHIFT_MASK) == 0
         || (key_event->state & GDK_CONTROL_MASK) == 0)

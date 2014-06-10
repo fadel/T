@@ -1,4 +1,5 @@
-PREFIX = /usr
+DESTDIR = /
+PREFIX = usr
 
 INCS = `pkg-config --cflags gtk+-2.0 vte`
 LIBS = `pkg-config --libs gtk+-2.0 vte`
@@ -26,7 +27,7 @@ clean:
 	@echo cleaning
 	@rm -f T ${OBJ} T-${VER}.tar.bz2
 
-dist: PKGBUILD
+dist: clean
 	@echo creating distributable tarball
 	@mkdir T-${VER}
 	@cp -R src/ T.desktop Makefile T-${VER}
@@ -38,3 +39,5 @@ install: all
 	@install -D -m755 T ${DESTDIR}${PREFIX}/bin/T
 	@echo installing desktop file in ${DESTDIR}${PREFIX}/share/applications
 	@install -D -m644 T.desktop ${DESTDIR}${PREFIX}/share/applications/T.desktop
+
+.PHONY: all clean dist install
