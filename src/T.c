@@ -31,12 +31,16 @@ static int window_count;
 /* Event callbacks */
 static gboolean window_delete_event_callback(GtkWidget *widget, GdkEvent *event, gpointer data);
 static void window_destroy_callback(GtkWidget *widget, gpointer data);
+
+static gboolean key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data);
+
 static void terminal_child_exited_callback(VteTerminal *terminal, gpointer data);
 static void terminal_window_title_changed_callback(VteTerminal *terminal, gpointer data);
 
-/* Helper setup functions */
+/* Helper functions */
+static void set_font_size(VteTerminal *terminal, int diff);
 static void setup_pty(VteTerminal *terminal, GPid *child_pid);
-static void set_app_preferences(VteTerminal *terminal);
+static void set_preferences(VteTerminal *terminal);
 static void setup_terminal(GtkWindow *window, VteTerminal *terminal);
 static void setup_window(GtkWindow *window);
 static void spawn_window(void);
@@ -58,45 +62,50 @@ window_destroy_callback(GtkWidget *widget, gpointer data)
 }
 
 static gboolean
-terminal_key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
+key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
     GdkEventKey *key_event = (GdkEventKey *) event;
-    VteTerminal *terminal = (VteTerminal *) widget;
+    VteTerminal *terminal = VTE_TERMINAL(widget);
 
-    if ((key_event->state & GDK_SHIFT_MASK) == 0
-        || (key_event->state & GDK_CONTROL_MASK) == 0)
+    gboolean has_shift = (key_event->state & GDK_SHIFT_MASK) != 0;
+    gboolean has_control = (key_event->state & GDK_CONTROL_MASK) != 0;
+
+    if (!has_control)
         return FALSE;
 
     switch (key_event->keyval) {
+    case GDK_KEY_minus:
+        set_font_size(terminal, -1);
+        return TRUE;
+    case GDK_KEY_plus:
+        set_font_size(terminal, 1);
+        return TRUE;
+    }
+
+    if (!has_shift)
+        return FALSE;
+
+    /* Handles ctrl + shift + {c,v,n} */
+    switch (key_event->keyval) {
     case GDK_KEY_C:
     case GDK_KEY_c:
-        /*
-         * This was:
-         * vte_terminal_copy_clipboard(terminal);
-         * break;
-         * But now we just turn this event into a Control+Insert and delegate it
-         */
+        /* turn this event into a Control+Insert and delegate it */
         key_event->keyval = GDK_KEY_Insert;
         key_event->state &= ~GDK_SHIFT_MASK;
-        return FALSE;
+        break;
     case GDK_KEY_V:
     case GDK_KEY_v:
-        /*
-         * This was:
-         * vte_terminal_paste_clipboard(terminal);
-         * break;
-         * But now we just turn this event into a Shift+Insert and delegate it
-         */
+        /* turn this event into a Shift+Insert and delegate it */
         key_event->keyval = GDK_KEY_Insert;
         key_event->state &= ~GDK_CONTROL_MASK;
-        return FALSE;
+        break;
     case GDK_KEY_N:
     case GDK_KEY_n:
         spawn_window();
-        break;
+        return TRUE;
     }
 
-    return TRUE;
+    return FALSE;
 }
 
 static void
@@ -104,7 +113,7 @@ terminal_child_exited_callback(VteTerminal *terminal, gpointer data)
 {
     GtkWindow *window;
 
-    window = (GtkWindow *) data;
+    window = GTK_WINDOW(data);
     gtk_widget_destroy(GTK_WIDGET(window));
 }
 
@@ -115,6 +124,15 @@ terminal_window_title_changed_callback(VteTerminal *terminal, gpointer data)
 
     window = (GtkWindow *) data;
     gtk_window_set_title(window, vte_terminal_get_window_title(terminal));
+}
+
+static void
+set_font_size(VteTerminal *terminal, int diff)
+{
+    PangoFontDescription *desc = (PangoFontDescription *) vte_terminal_get_font(terminal);
+    gint font_size = pango_font_description_get_size(desc) + diff * PANGO_SCALE;
+    pango_font_description_set_size(desc, font_size);
+    vte_terminal_set_font(terminal, desc);
 }
 
 static void
@@ -131,7 +149,7 @@ setup_pty(VteTerminal *terminal, GPid *child_pid)
 }
 
 static void
-set_app_preferences(VteTerminal *terminal)
+set_preferences(VteTerminal *terminal)
 {
     /*
      * Options set here can (and should) be configured through config.h
@@ -173,10 +191,10 @@ setup_terminal(GtkWindow *window, VteTerminal *terminal)
     vte_terminal_watch_child(terminal, child_pid);
 
     g_signal_connect(terminal, "child-exited", G_CALLBACK(terminal_child_exited_callback), window);
+    g_signal_connect(terminal, "key-press-event", G_CALLBACK(key_press_callback), window);
     g_signal_connect(terminal, "window-title-changed", G_CALLBACK(terminal_window_title_changed_callback), window);
-    g_signal_connect(terminal, "key-press-event", G_CALLBACK(terminal_key_press_callback), window);
 
-    set_app_preferences(terminal);
+    set_preferences(terminal);
 }
 
 static void
@@ -227,10 +245,9 @@ main(int argc, char *argv[])
     spawn_window();
 
     /*
-     * TODO
+     * TODO:
      * Find out a nice and clean way of opening more windows when the user
-     * does not have focus on a T window. Maybe fire spawn_window() when we
-     * detect a running T process?
+     * does not have focus on a T window.
      */
 
     gtk_main();
