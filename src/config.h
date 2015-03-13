@@ -63,3 +63,6 @@ static const char *CONFIG_COLOR_PALETTE[CONFIG_PALETTE_SIZE] = {
 
 /* Visible bell (TRUE or FALSE) */
 #define CONFIG_VISIBLE_BELL FALSE
+
+/* Cursor blink mode. One of: VTE_CURSOR_BLINK_SYSTEM/ON/OFF */
+#define CONFIG_CURSOR_BLINK_MODE VTE_CURSOR_BLINK_OFF

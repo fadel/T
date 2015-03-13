@@ -176,6 +176,7 @@ set_preferences(VteTerminal *terminal)
     /* Set preferences */
     vte_terminal_set_audible_bell(terminal, CONFIG_AUDIBLE_BELL);
     vte_terminal_set_colors(terminal, &fg_color, &bg_color, palette, CONFIG_PALETTE_SIZE);
+    vte_terminal_set_cursor_blink_mode(terminal, CONFIG_CURSOR_BLINK_MODE);
     vte_terminal_set_font_from_string(terminal, CONFIG_FONT_NAME);
     vte_terminal_set_mouse_autohide(terminal, CONFIG_MOUSE_AUTOHIDE);
     vte_terminal_set_scrollback_lines(terminal, CONFIG_SCROLLBACK_LINES);
