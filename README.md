@@ -14,21 +14,25 @@ develop T, but it will *probably* work with any API-compatible versions.
 * VTE 0.28
 * GTK+ 2.24
 
-To compile T, run:
+To compile T, run
 
     make
 
 ## Installation ##
-To install T, run (needs superuser privileges):
+To install T, run (needs superuser privileges)
 
     make install
 
 ## Usage ##
 `Td` has no invocation arguments. You just keep it running and it will listen on
-a local socket file (see `config.h`) for connections from `Tc`. `Tc` has the
-following invocation arguments:
+a local socket file (see `config.h`) for connections from `Tc`. `Tc` is invoked
+as
 
-`-n`
-	Requests a new window; default if omitted
-`-x`
-	Request daemon termination; only successful if there are no open windows
+    Tc [ARG]
+
+where `ARG` is one of the arguments in the following table.
+
+Argument | Description
+---------|-------------------------------------------------------------------------
+`-n`     | Requests a new window; default if omitted
+`-x`     | Request daemon termination; only successful if there are no open windows
