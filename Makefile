@@ -43,8 +43,6 @@ install: all
 	@echo installing executable files in ${DESTDIR}${PREFIX}/bin
 	@install -D -m755 Tc ${DESTDIR}${PREFIX}/bin/Tc
 	@install -D -m755 Td ${DESTDIR}${PREFIX}/bin/Td
-	#@echo installing desktop file in ${DESTDIR}${PREFIX}/share/applications
-	#@install -D -m644 T.desktop ${DESTDIR}${PREFIX}/share/applications/T.desktop
 
 uninstall:
 	@echo removing executables files from ${DESTDIR}${PREFIX}/bin
