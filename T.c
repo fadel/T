@@ -1,6 +1,5 @@
 /*
  * T.c
- *
  * T is a lean Terminal emulator.
  *
  * This file is part of T.
@@ -23,42 +22,28 @@
 #include <gtk/gtk.h>
 #include <unistd.h>
 #include <vte/vte.h>
+#include <stdlib.h>
 
-#include "config.h"
+#include "T.h"
 
-static int window_count;
+static int window_count = 0;
 
 /* Event callbacks */
-static gboolean window_delete_event_callback(GtkWidget *widget, GdkEvent *event, gpointer data);
 static void window_destroy_callback(GtkWidget *widget, gpointer data);
-
 static gboolean key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data);
-
 static void terminal_child_exited_callback(VteTerminal *terminal, gpointer data);
 static void terminal_window_title_changed_callback(VteTerminal *terminal, gpointer data);
 
 /* Helper functions */
-static void set_font_size(VteTerminal *terminal, int diff);
-static void setup_pty(VteTerminal *terminal, GPid *child_pid);
+static void change_font_size(VteTerminal *terminal, int delta);
 static void set_preferences(VteTerminal *terminal);
 static void setup_terminal(GtkWindow *window, VteTerminal *terminal);
-static void setup_window(GtkWindow *window);
-static void spawn_window(void);
-
-static gboolean
-window_delete_event_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-    /* TODO: always false? */
-    return FALSE;
-}
 
 static void
 window_destroy_callback(GtkWidget *widget, gpointer data)
 {
+    /* Keeping track of the open windows */
     window_count--;
-
-    if (window_count == 0)
-        gtk_main_quit();
 }
 
 static gboolean
@@ -75,10 +60,10 @@ key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
 
     switch (key_event->keyval) {
     case GDK_KEY_minus:
-        set_font_size(terminal, -1);
+        change_font_size(terminal, -1);
         return TRUE;
     case GDK_KEY_plus:
-        set_font_size(terminal, 1);
+        change_font_size(terminal, 1);
         return TRUE;
     }
 
@@ -101,7 +86,7 @@ key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
         break;
     case GDK_KEY_N:
     case GDK_KEY_n:
-        spawn_window();
+        new_window();
         return TRUE;
     }
 
@@ -111,48 +96,31 @@ key_press_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
 static void
 terminal_child_exited_callback(VteTerminal *terminal, gpointer data)
 {
-    GtkWindow *window;
-
-    window = GTK_WINDOW(data);
-    gtk_widget_destroy(GTK_WIDGET(window));
+    /* The forked process exited; issue destruction of the terminal window */
+    gtk_widget_destroy(GTK_WIDGET(GTK_WINDOW(data)));
 }
 
 static void
 terminal_window_title_changed_callback(VteTerminal *terminal, gpointer data)
 {
-    GtkWindow *window;
-
-    window = (GtkWindow *) data;
+    GtkWindow *window = GTK_WINDOW(data);
     gtk_window_set_title(window, vte_terminal_get_window_title(terminal));
 }
 
 static void
-set_font_size(VteTerminal *terminal, int diff)
+change_font_size(VteTerminal *terminal, int delta)
 {
     PangoFontDescription *desc = (PangoFontDescription *) vte_terminal_get_font(terminal);
-    gint font_size = pango_font_description_get_size(desc) + diff * PANGO_SCALE;
+    gint font_size = pango_font_description_get_size(desc) + delta * PANGO_SCALE;
     pango_font_description_set_size(desc, font_size);
     vte_terminal_set_font(terminal, desc);
-}
-
-static void
-setup_pty(VteTerminal *terminal, GPid *child_pid)
-{
-    VtePty* pty;
-    char *argv[] = { NULL, NULL };
-
-    /* TODO: error handling */
-    argv[0] = vte_get_user_shell();
-    pty = vte_terminal_pty_new(terminal, VTE_PTY_DEFAULT, NULL);
-    vte_terminal_set_pty_object(terminal, pty);
-    vte_terminal_fork_command_full(terminal, VTE_PTY_DEFAULT, ".", argv, NULL, G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, child_pid, NULL);
 }
 
 static void
 set_preferences(VteTerminal *terminal)
 {
     /*
-     * Options set here can (and should) be configured through config.h
+     * Options set here can (and should) be configured in config.h
      */
 
     /*
@@ -161,6 +129,24 @@ set_preferences(VteTerminal *terminal)
      */
     static gboolean colors_parsed = FALSE;
     static GdkColor palette[CONFIG_PALETTE_SIZE], bg_color, fg_color;
+    static const char *CONFIG_COLOR_PALETTE[CONFIG_PALETTE_SIZE] = {
+        CONFIG_PALLETE_0,
+        CONFIG_PALLETE_1,
+        CONFIG_PALLETE_2,
+        CONFIG_PALLETE_3,
+        CONFIG_PALLETE_4,
+        CONFIG_PALLETE_5,
+        CONFIG_PALLETE_6,
+        CONFIG_PALLETE_7,
+        CONFIG_PALLETE_8,
+        CONFIG_PALLETE_9,
+        CONFIG_PALLETE_10,
+        CONFIG_PALLETE_11,
+        CONFIG_PALLETE_12,
+        CONFIG_PALLETE_13,
+        CONFIG_PALLETE_14,
+        CONFIG_PALLETE_15,
+    };
 
     if (!colors_parsed) {
         int i;
@@ -186,10 +172,19 @@ set_preferences(VteTerminal *terminal)
 static void
 setup_terminal(GtkWindow *window, VteTerminal *terminal)
 {
+    char *argv[] = { vte_get_user_shell(), NULL };
     GPid child_pid;
 
-    setup_pty(terminal, &child_pid);
-    vte_terminal_watch_child(terminal, child_pid);
+    vte_terminal_fork_command_full(terminal,
+            VTE_PTY_DEFAULT,
+            NULL, /* wd; NULL for cwd */
+            argv, /* the program to fork into and its args */
+            NULL, /* env vars */
+            G_SPAWN_DO_NOT_REAP_CHILD,
+            NULL, /* setup func */
+            NULL, /* custom data to setup func */
+            &child_pid,
+            NULL); /* TODO: error handling */
 
     g_signal_connect(terminal, "child-exited", G_CALLBACK(terminal_child_exited_callback), window);
     g_signal_connect(terminal, "key-press-event", G_CALLBACK(key_press_callback), window);
@@ -198,15 +193,20 @@ setup_terminal(GtkWindow *window, VteTerminal *terminal)
     set_preferences(terminal);
 }
 
-static void
-setup_window(GtkWindow *window)
+int
+num_open_windows()
 {
-    GdkGeometry hints;
-    VteTerminal *terminal;
+    return window_count;
+}
 
-    terminal = (VteTerminal *) vte_terminal_new();
+void
+new_window()
+{
+    GtkWindow *window = (GtkWindow *) gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    VteTerminal *terminal = (VteTerminal *) vte_terminal_new();
     setup_terminal(window, terminal);
 
+    GdkGeometry hints;
     hints.base_width  = vte_terminal_get_char_width(terminal);
     hints.base_height = vte_terminal_get_char_height(terminal);
     hints.min_width   = hints.base_width * CONFIG_MIN_WIDTH;
@@ -214,44 +214,28 @@ setup_window(GtkWindow *window)
     hints.width_inc   = hints.base_width;
     hints.height_inc  = hints.base_height;
     gtk_window_set_geometry_hints(window, GTK_WIDGET(terminal), &hints, GDK_HINT_RESIZE_INC | GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE);
-
-    g_signal_connect(window, "delete-event", G_CALLBACK(window_delete_event_callback), NULL);
-    g_signal_connect(window, "destroy", G_CALLBACK(window_destroy_callback), NULL);
     gtk_window_set_icon_name(window, "utilities-terminal");
+
+    g_signal_connect(window, "delete-event", G_CALLBACK(gtk_false), NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(window_destroy_callback), NULL);
 
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(terminal));
 
     gtk_widget_show(GTK_WIDGET(terminal));
     gtk_widget_show(GTK_WIDGET(window));
-}
-
-static void
-spawn_window(void)
-{
-    GtkWindow *window;
-
-    window = (GtkWindow *) gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    setup_window(window);
 
     window_count++;
 }
 
-int
-main(int argc, char *argv[])
+void
+wrn(const char *message)
 {
-    gtk_init(&argc, &argv);
+    fprintf(stderr, "%s: %s\n", PROGRAM_NAME, message);
+}
 
-    /* Initial state: single window */
-    window_count = 0;
-    spawn_window();
-
-    /*
-     * TODO:
-     * Find out a nice and clean way of opening more windows when the user
-     * does not have focus on a T window.
-     */
-
-    gtk_main();
-
-    return 0;
+void
+err(const char *message, int ecode)
+{
+    wrn(message);
+    exit(ecode);
 }

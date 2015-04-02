@@ -1,6 +1,5 @@
 /*
  * config.h
- *
  * Configuration file. Modify these to customize T.
  *
  * This file is part of T.
@@ -18,6 +17,12 @@
  * T. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* The directory of the connection socket used by the T daemon. */
+#define CONFIG_SOCKDIR "/tmp/Td"
+
+/* The name of the connection socket used by the T daemon. */
+#define CONFIG_SOCKNAME "Td.sock"
+
 /* Minimum width/height, in characters */
 #define CONFIG_MIN_WIDTH  20
 #define CONFIG_MIN_HEIGHT 5
@@ -29,24 +34,22 @@
 /* PALETTE_SIZE must be 8, 16, 24 or between 25 and 255, inclusive */
 #define CONFIG_PALETTE_SIZE 16
 
-static const char *CONFIG_COLOR_PALETTE[CONFIG_PALETTE_SIZE] = {
-	"#000000", /* 0 Black */
-	"#95513a", /* 1 Red */
-	"#3a9551", /* 2 Green */
-	"#7e953a", /* 3 Yellow */
-	"#3d558d", /* 4 Blue */
-	"#953a7e", /* 5 Magenta */
-	"#3a7e95", /* 6 Cyan */
-	"#d9d9d9", /* 7 White */
-	"#262626", /* 8 Black */
-	"#c17860", /* 9 Red */
-	"#60c178", /* 10 Green */
-	"#a9c160", /* 11 Yellow */
-	"#5f7aba", /* 12 Blue */
-	"#c160a9", /* 13 Magenta */
-	"#60a9c1", /* 14 Cyan */
-	"#ffffff", /* 15 White */
-};
+#define CONFIG_PALLETE_0  "#000000" /* Black */
+#define CONFIG_PALLETE_1  "#95513a" /* Red */
+#define CONFIG_PALLETE_2  "#3a9551" /* Green */
+#define CONFIG_PALLETE_3  "#7e953a" /* Yellow */
+#define CONFIG_PALLETE_4  "#3d558d" /* Blue */
+#define CONFIG_PALLETE_5  "#953a7e" /* Magenta */
+#define CONFIG_PALLETE_6  "#3a7e95" /* Cyan */
+#define CONFIG_PALLETE_7  "#d9d9d9" /* White */
+#define CONFIG_PALLETE_8  "#262626" /* Black */
+#define CONFIG_PALLETE_9  "#c17860" /* Red */
+#define CONFIG_PALLETE_10 "#60c178" /* Green */
+#define CONFIG_PALLETE_11 "#a9c160" /* Yellow */
+#define CONFIG_PALLETE_12 "#5f7aba" /* Blue */
+#define CONFIG_PALLETE_13 "#c160a9" /* Magenta */
+#define CONFIG_PALLETE_14 "#60a9c1" /* Cyan */
+#define CONFIG_PALLETE_15 "#ffffff" /* White */
 
 /* Foreground and background. */
 #define CONFIG_FOREGROUND_COLOR "#d9e6f2" /* COLOR_PALETTE[7] */
