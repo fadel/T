@@ -29,15 +29,7 @@ Td: T.o Td.o
 
 clean:
 	@echo cleaning
-	@rm -f Tc Td ${OBJ} T-${VER}.tar.bz2
-
-dist: clean
-	#TODO: remove .desktop file?
-	@echo creating distributable tarball
-	@mkdir T-${VER}
-	@cp -R src/ T.desktop Makefile T-${VER}
-	@tar cf T-${VER}.tar.bz2 T-${VER}
-	@rm -rf T-${VER}
+	@rm -f Tc Td ${OBJ}
 
 install: all
 	@echo installing executable files in ${DESTDIR}${PREFIX}/bin
@@ -49,4 +41,4 @@ uninstall:
 	@rm -f ${DESTDIR}${PREFIX}/bin/Tc
 	@rm -f ${DESTDIR}${PREFIX}/bin/Td
 
-.PHONY: all clean dist install uninstall
+.PHONY: all clean install uninstall
