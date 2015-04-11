@@ -37,7 +37,7 @@ install: all
 	@install -D -m755 Td ${DESTDIR}${PREFIX}/bin/Td
 
 uninstall:
-	@echo removing executables files from ${DESTDIR}${PREFIX}/bin
+	@echo removing executable files from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/Tc
 	@rm -f ${DESTDIR}${PREFIX}/bin/Td
 
