@@ -8,37 +8,31 @@ LDFLAGS = -s ${LIBS}
 VER = 0.9
 CC = cc
 
-SRC = T.c Tc.c Td.c
+SRC = T.c
 OBJ = ${SRC:.c=.o}
 
-all: Tc Td
+all: T
 
 %.o: %.c
 	@echo CC $<
 	@${CC} -c ${CFLAGS} -o $@ $<
 
-${OBJ}: config.h T.h
+${OBJ}: config.h
 
-Tc: T.o Tc.o
-	@echo CC -o $@
-	@${CC} -o $@ $^ ${LDFLAGS}
-
-Td: T.o Td.o
+T: T.o
 	@echo CC -o $@
 	@${CC} -o $@ $^ ${LDFLAGS}
 
 clean:
 	@echo cleaning
-	@rm -f Tc Td ${OBJ}
+	@rm -f T ${OBJ}
 
 install: all
 	@echo installing executable files in ${DESTDIR}${PREFIX}/bin
-	@install -D -m755 Tc ${DESTDIR}${PREFIX}/bin/Tc
-	@install -D -m755 Td ${DESTDIR}${PREFIX}/bin/Td
+	@install -D -m755 T ${DESTDIR}${PREFIX}/bin/T
 
 uninstall:
 	@echo removing executable files from ${DESTDIR}${PREFIX}/bin
-	@rm -f ${DESTDIR}${PREFIX}/bin/Tc
-	@rm -f ${DESTDIR}${PREFIX}/bin/Td
+	@rm -f ${DESTDIR}${PREFIX}/bin/T
 
 .PHONY: all clean install uninstall
