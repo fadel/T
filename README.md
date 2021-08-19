@@ -1,5 +1,5 @@
-This project was mostly an exercise on how to make the leanest possible terminal
-emulator using GTK+2 and VTE. It is not actively developed.
+**NOTE:** This project was mostly an exercise on how to make the leanest possible
+terminal emulator using GTK+2 and VTE. It is not actively developed.
 
 # T #
 T is a lean **T**erminal emulator. The project aims to keep it as simple as
